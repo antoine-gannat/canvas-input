@@ -2,6 +2,8 @@
 
 A simple and easy to use input bar for canvas.
 
+An example [here](https://antoine-gannat.github.io/canvas-input/)
+
 # Usage
 
 - Import the canvas-input.js or canvas-input.min.js file
