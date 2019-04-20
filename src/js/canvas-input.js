@@ -10,6 +10,7 @@ class CanvasInput {
         // Input
         this.input_text = "";
         this.input_selected = false;
+        this.text_overflow_offset = 0;
 
         // Events
 
@@ -23,8 +24,6 @@ class CanvasInput {
             { key: "ArrowUp", callback: this.onArrowPress.bind(this) },
             { key: "ArrowDown", callback: this.onArrowPress.bind(this) },
         ];
-
-        // Init functions calls
 
         this.calculateTextPosition();
         this.input_selector_pos = this.calculateSelectorPosition();
@@ -116,8 +115,9 @@ class CanvasInput {
         this.ctx.font = this.text_size + "px " + this.text_font;
 
         // check if adding a character would make the text too big to display
-        if (this.ctx.measureText(this.input_text + e.key).width > this.width)
-            return;
+        if (this.ctx.measureText(this.input_text.substr(this.text_overflow_offset) + e.key).width > this.width) {
+            this.text_overflow_offset++;
+        }
 
         // Add the key pressed to the input text
         this.input_text += e.key;
@@ -133,6 +133,9 @@ class CanvasInput {
             // Move the selector to the left
             if (this.input_selector_pos > 0)
                 this.input_selector_pos--;
+            // If the text is overflowing
+            if (this.text_overflow_offset > 0)
+                this.text_overflow_offset--;
         }
     }
 
@@ -144,6 +147,7 @@ class CanvasInput {
         this.submit_callback(this.input_text);
         // clear the text
         this.input_text = "";
+        this.text_overflow_offset = 0;
     }
 
     onArrowPress(e) {
@@ -191,7 +195,7 @@ class CanvasInput {
     calculateSelectorPosition() {
         // Calculate the position of the selector
         // Get the text that is display on the left of the cursor
-        var previous_text = this.input_text.substr(0, this.input_selector_pos);
+        var previous_text = this.input_text.substr(this.text_overflow_offset, this.input_selector_pos);
         // Calculate the size of the text on the left of the cursor and add the position of the element
         return (this.input_text_pos.x + this.ctx.measureText(previous_text).width);
     }
@@ -213,8 +217,9 @@ class CanvasInput {
         this.ctx.font = this.text_size + "px " + this.text_font;
         // Set the color of the text
         this.ctx.fillStyle = this.text_color;
+        var text_to_display = this.input_text.substr(this.text_overflow_offset);
         // Display the text
-        this.ctx.fillText(this.input_text, this.input_text_pos.x, this.input_text_pos.y);
+        this.ctx.fillText(text_to_display, this.input_text_pos.x, this.input_text_pos.y);
         // Display
         this.ctx.stroke();
     }
