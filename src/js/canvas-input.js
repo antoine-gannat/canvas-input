@@ -121,7 +121,9 @@ class CanvasInput {
             if (!this.allow_overflow)
                 return;
             // Add an overflow offset to hide the first letters entered
-            this.text_overflow_offset++;
+            while (this.ctx.measureText(this.input_text.substr(this.text_overflow_offset) + e.key).width > this.width) {
+                this.text_overflow_offset++;
+            }
         }
 
         // Add the key pressed to the input text
@@ -139,9 +141,17 @@ class CanvasInput {
             // Move the selector to the left
             if (this.input_selector_pos > 0)
                 this.input_selector_pos--;
+
             // If the text is overflowing
-            if (this.text_overflow_offset > 0)
-                this.text_overflow_offset--;
+            if (this.text_overflow_offset > 0) {
+                // set the text font and size
+                this.ctx.font = this.text_size + "px " + this.text_font;
+                // Remove overflow offsets until the text fit completly the input OR if there is no more offsets
+                while (this.ctx.measureText(this.input_text.substr(this.text_overflow_offset - 1)).width < this.width
+                    && this.text_overflow_offset > 0) {
+                    this.text_overflow_offset--;
+                }
+            }
         }
     }
 
