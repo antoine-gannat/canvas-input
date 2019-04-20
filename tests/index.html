@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test canvas-input</title>
+</head>
+
+<body>
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <div id="messages">
+
+    </div>
+    <script src="src/js/canvas-input.js"></script>
+    <script>
+        var canvas = document.getElementById("canvas");
+
+        function onsubmit(text) {
+            var message = document.createElement("p");
+            message.innerHTML = text;
+            document.getElementById("messages").appendChild(message);
+        }
+
+        var canvasInput = new CanvasInput(canvas,
+            {
+                pos_x: 40,
+                pos_y: 50,
+                submit_callback: onsubmit,
+                placeholder: "Enter text here ..."
+            });
+        setInterval(() => {
+            canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+            canvasInput.render();
+        }, 10);
+    </script>
+</body>
+
+</html>
