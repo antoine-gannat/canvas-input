@@ -10,23 +10,29 @@
     <div id="messages">
 
     </div>
-    <script src="src/js/canvas-input.js"></script>
+    <script src="../src/js/canvas-input.js"></script>
     <script>
         var canvas = document.getElementById("canvas");
 
+        // Handle the submit of the input
         function onsubmit(text) {
+            // Create a new 'p' element
             var message = document.createElement("p");
+            // Add the text to the element
             message.innerHTML = text;
+            // Add the element to the page
             document.getElementById("messages").appendChild(message);
         }
 
+        // Create the element and set some parameters
         var canvasInput = new CanvasInput(canvas,
             {
                 pos_x: 40,
                 pos_y: 50,
-                submit_callback: onsubmit,
-                placeholder: "Enter text here ..."
+                contour_width: 1,
+                submit_callback: onsubmit
             });
+        // Set an interval to render the canvas every 10ms
         setInterval(() => {
             canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
             canvasInput.render();

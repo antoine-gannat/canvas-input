@@ -43,7 +43,7 @@ class CanvasInput {
             text_font: "Arial",
             text_color: "Black",
             submit_callback: null,
-            placeholder: null
+            placeholder: "Enter text here ..."
         };
 
         for (var key in defaultValues) {
@@ -61,8 +61,27 @@ class CanvasInput {
     // Event functions
 
     addEventListeners() {
+        // event listener to catch a click
         this.canvas.addEventListener("click", (e) => this.eventOnClick(e));
+        // event listener to catch the hovering of the mouse
+        this.canvas.addEventListener("mousemove", (e) => this.eventOnMouseHover(e));
+        // event listener to catch the key pressed
         window.addEventListener("keydown", (e) => this.eventOnKeydown(e));
+    }
+
+    eventOnMouseHover(e) {
+        // Get the mouse position
+        const mousePosition = { x: e.clientX, y: e.clientY };
+        // Check if the mouse is inside the elemetn
+        if (this.isPositionInElement(mousePosition)) {
+            // If so, change the cursor to the type: 'text'
+            this.canvas.style.cursor = "text";
+        }
+        else {
+            // If the mouse is outside of the element and the cursor type was 'text', we change it to 'auto'
+            if (this.canvas.style.cursor === "text")
+                this.canvas.style.cursor = "auto";
+        }
     }
 
     eventOnClick(e) {
@@ -70,8 +89,7 @@ class CanvasInput {
         const clickPosition = { x: e.clientX, y: e.clientY };
 
         // Check if click is inside the input
-        if (clickPosition.x < this.pos_x || clickPosition.x > this.pos_x + this.width
-            || clickPosition.y < this.pos_y || clickPosition.y > this.pos_y + this.height) {
+        if (!this.isPositionInElement(clickPosition)) {
             // if not, set the input to not selected
             this.input_selected = false;
             return;
@@ -178,26 +196,41 @@ class CanvasInput {
         return (this.input_text_pos.x + this.ctx.measureText(previous_text).width);
     }
 
+    // Check if a position is inside the element
+    isPositionInElement(position) {
+        if (position.x >= this.pos_x && position.x <= this.pos_x + this.width
+            && position.y >= this.pos_y && position.y <= this.pos_y + this.height) {
+            return (true);
+        }
+        return (false);
+    }
+
     // Display functions
 
     // Display the current content of the input
     drawInputText() {
         // set the font and the size of the text
         this.ctx.font = this.text_size + "px " + this.text_font;
-        // Set the text color
+        // Set the color of the text
         this.ctx.fillStyle = this.text_color;
-        // display the text
+        // Display the text
         this.ctx.fillText(this.input_text, this.input_text_pos.x, this.input_text_pos.y);
+        // Display
         this.ctx.stroke();
     }
 
     // Display the contour of the input
     drawInputContour() {
+        // If the contour is inferior or equal to 0, we don't display a contour
         if (this.contour_width <= 0)
             return;
-        this.ctx.rect(this.pos_x, this.pos_y, this.width, this.height);
+        // Set the width of the contour
         this.ctx.lineWidth = this.contour_width;
+        // Set the color of the contour
         this.ctx.strokeStyle = this.contour_color;
+        // Draw a rectangle
+        this.ctx.rect(this.pos_x, this.pos_y, this.width, this.height);
+        // Display
         this.ctx.stroke();
     }
 
@@ -206,9 +239,11 @@ class CanvasInput {
             return;
         // set the font and the size of the text
         this.ctx.font = this.text_size + "px " + this.text_font;
-
-        // display the selector
+        // Set the color of the text
+        this.ctx.fillStyle = this.text_color;
+        // Display the selector
         this.ctx.fillText('|', this.calculateSelectorPosition(), this.input_text_pos.y);
+        // Display
         this.ctx.stroke();
     }
 
@@ -218,9 +253,11 @@ class CanvasInput {
             return;
         // set the font and the size of the text
         this.ctx.font = this.text_size + "px " + this.text_font;
+        // Set the color of the text
         this.ctx.fillStyle = "#808080";
         // display the placeholder
         this.ctx.fillText(this.placeholder, this.input_text_pos.x, this.input_text_pos.y);
+        // Display
         this.ctx.stroke();
     }
 
