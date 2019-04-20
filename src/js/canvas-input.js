@@ -2,6 +2,7 @@ class CanvasInput {
     constructor(canvas, parameters) {
         // Init variables
         this.canvas = canvas;
+        // Assign the parameters
         this.assignDefaultParameters(parameters);
 
         // Canvas
@@ -9,13 +10,16 @@ class CanvasInput {
 
         // Input
         this.input_text = "";
+        // True if the element is currently selected
         this.input_selected = false;
+        // An offset used to hide letters at the begining of the text if the text is too big to display
         this.text_overflow_offset = 0;
 
         // Events
 
         this.addEventListeners();
 
+        // Create a map of callbacks that are link to a special key
         this.special_keys_callbacks = [
             { key: "Backspace", callback: this.onBackspacePress.bind(this) },
             { key: "Enter", callback: this.onEnterPress.bind(this) },
@@ -25,12 +29,16 @@ class CanvasInput {
             { key: "ArrowDown", callback: this.onArrowPress.bind(this) },
         ];
 
+        // Calculate the position of the text in the element
         this.calculateTextPosition();
+
+        // Get the position of the selector in the text
         this.input_selector_pos = this.calculateSelectorPosition();
     }
 
     // Set the parameters or default values if the parameter is not found
     assignDefaultParameters(parameters) {
+        // Default values for parameters
         const defaultValues = {
             pos_x: 0,
             pos_y: 0,
@@ -43,9 +51,12 @@ class CanvasInput {
             text_color: "Black",
             submit_callback: null,
             placeholder: "Enter text here ...",
-            allow_overflow: true
+            allow_overflow: true,
+            change_cursor_on_hover: true,
+            background_color: "#FFFFFF"
         };
 
+        // Go through each parameter
         for (var key in defaultValues) {
             // if the parameter exist
             if (parameters && parameters.hasOwnProperty(key)) {
@@ -70,6 +81,9 @@ class CanvasInput {
     }
 
     eventOnMouseHover(e) {
+        // Leave if the parameter to change the cursor is disabled
+        if (!this.change_cursor_on_hover)
+            return;
         // Get the mouse position
         const mousePosition = { x: e.clientX, y: e.clientY };
         // Check if the mouse is inside the elemetn
@@ -120,7 +134,7 @@ class CanvasInput {
             // If the overflow is not allowed, we don't add the character
             if (!this.allow_overflow)
                 return;
-            // Add an overflow offset to hide the first letters entered
+            // Add an overflow offset to hide the first letters inserted
             while (this.ctx.measureText(this.input_text.substr(this.text_overflow_offset) + e.key).width > this.width) {
                 this.text_overflow_offset++;
             }
@@ -163,6 +177,7 @@ class CanvasInput {
         this.submit_callback(this.input_text);
         // clear the text
         this.input_text = "";
+        // clear the overflow offset
         this.text_overflow_offset = 0;
     }
 
@@ -170,10 +185,12 @@ class CanvasInput {
         // Move the position of the selector
         switch (e.key) {
             case "ArrowLeft":
+                // Move the selector to the left
                 if (this.input_selector_pos > 0)
                     this.input_selector_pos--;
                 break;
             case "ArrowRight":
+                // Move the selector to the right
                 if (this.input_selector_pos + 1 <= this.input_text.length)
                     this.input_selector_pos++;
                 break;
@@ -194,13 +211,9 @@ class CanvasInput {
 
     // Calcul functions
 
-    // get the position of the text
+    // set the position of the text
     calculateTextPosition() {
-        // Calculate the position of the text verticaly
-        // The vertical position is:
-        //    the position of the element
-        //  + the height of the element divided by 2
-        //  + the size of the text divided by 3
+        // Calculate the position of the text to center it verticaly inside the element
 
         this.input_text_pos = {
             x: this.pos_x,
@@ -251,10 +264,15 @@ class CanvasInput {
         this.ctx.strokeStyle = this.contour_color;
         // Draw a rectangle
         this.ctx.rect(this.pos_x, this.pos_y, this.width, this.height);
+        // Set fill color
+        this.ctx.fillStyle = this.background_color;
+        // Draw filled rectangle
+        this.ctx.fillRect(this.pos_x, this.pos_y, this.width, this.height);
         // Display
         this.ctx.stroke();
     }
 
+    // Display the selector used to go through the text and edit it
     drawInputSelector() {
         if (!this.input_selected)
             return;
@@ -269,7 +287,7 @@ class CanvasInput {
     }
 
     drawPlaceholder() {
-        // do not display the placeholder if some text is already entered
+        // do not display the placeholder if some text is already inserted or if there is no placeholder
         if (this.input_text.length > 0 || !this.placeholder)
             return;
         // set the font and the size of the text
@@ -282,13 +300,10 @@ class CanvasInput {
         this.ctx.stroke();
     }
 
+    // render the element
     render() {
-        // Check if the canvas is defined
-        if (!this.canvas) {
-            return;
-        }
-        this.drawPlaceholder();
         this.drawInputContour();
+        this.drawPlaceholder();
         this.drawInputText();
         this.drawInputSelector();
     }
