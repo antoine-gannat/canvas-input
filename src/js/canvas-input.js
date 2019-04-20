@@ -42,7 +42,8 @@ class CanvasInput {
             text_font: "Arial",
             text_color: "Black",
             submit_callback: null,
-            placeholder: "Enter text here ..."
+            placeholder: "Enter text here ...",
+            allow_overflow: true
         };
 
         for (var key in defaultValues) {
@@ -116,6 +117,10 @@ class CanvasInput {
 
         // check if adding a character would make the text too big to display
         if (this.ctx.measureText(this.input_text.substr(this.text_overflow_offset) + e.key).width > this.width) {
+            // If the overflow is not allowed, we don't add the character
+            if (!this.allow_overflow)
+                return;
+            // Add an overflow offset to hide the first letters entered
             this.text_overflow_offset++;
         }
 
@@ -128,8 +133,9 @@ class CanvasInput {
         // If the backspace key is pressed and there is at least one character in the input text
         // we remove the last character
         if (this.input_text.length > 0) {
-            // remove the last character from the string
-            this.input_text = this.input_text.substr(0, this.input_text.length - 1);
+            // remove character that is located at the left of the selector
+            this.input_text = this.input_text.substr(0, this.input_selector_pos - 1)
+                + this.input_text.substr(this.input_selector_pos, this.input_text.length);
             // Move the selector to the left
             if (this.input_selector_pos > 0)
                 this.input_selector_pos--;
